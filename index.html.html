@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trình chiếu Kiểm tra Âm nhạc</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #ffeef8 0%, #f8e8ff 30%, #ffe8f0 70%, #fff0f8 100%);
+            min-height: 100vh;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 182, 193, 0.3);
+            box-shadow: 0 12px 40px 0 rgba(255, 182, 193, 0.2);
+        }
+        
+        .fredoka {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+        }
+        
+        @keyframes fadeInUp {
+            0% { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        @keyframes logoSpin {
+            0% { transform: scale(0.5) rotate(-180deg); opacity: 0; }
+            50% { transform: scale(1.1) rotate(0deg); opacity: 0.8; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        
+        @keyframes progressBar {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        
+        .logo-spin {
+            animation: logoSpin 2s ease-out;
+        }
+        
+        .progress-bar {
+            animation: progressBar 3s ease-in-out;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0) rotate(0deg); }
+            40% { transform: translateY(-12px) rotate(5deg); }
+            60% { transform: translateY(-6px) rotate(-3deg); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes sparkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .music-icon {
+            animation: bounce 2.5s infinite;
+            display: inline-block;
+        }
+        
+        .float-icon {
+            animation: float 3s ease-in-out infinite;
+            display: inline-block;
+        }
+        
+        .pulse-icon {
+            animation: pulse 2s ease-in-out infinite;
+            display: inline-block;
+        }
+        
+        .sparkle-icon {
+            animation: sparkle 1.5s ease-in-out infinite;
+            display: inline-block;
+        }
+        
+        .btn-hover {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-hover:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(255, 182, 193, 0.4);
+        }
+        
+        .btn-hover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-hover:hover::before {
+            left: 100%;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(45deg, #ff6b9d, #c44569, #f8b500, #ff6b9d);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .hidden {
+            display: none;
+        }
+
+        /* Thêm style cho nút Start Video */
+        .start-video-btn {
+            background-color: #4CAF50; /* Xanh lá */
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .start-video-btn:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <main class="w-full max-w-4xl">
+        <!-- Màn hình khởi động -->
+        <div id="loadingScreen" class="glass p-8 text-center fade-in">
+            <div class="flex flex-col items-center justify-center min-h-[60vh]">
+                <div class="mb-8">
+                    <img src="https://i.postimg.cc/QMVXzkYz/ART-PRO-EDUCATION.jpg" 
+                         alt="Art Pro Education" 
+                         class="w-64 h-auto rounded-2xl shadow-2xl logo-spin mx-auto"
+                         onerror="this.style.display='none';">
+                </div>
+                
+                <div class="flex justify-center items-center mb-6">
+                    <span class="sparkle-icon text-3xl mr-2">✨</span>
+                    <span class="music-icon text-4xl mr-2">🎵</span>
+                    <span class="float-icon text-3xl mr-2">🌸</span>
+                </div>
+                
+                <h1 class="text-3xl md:text-5xl fredoka gradient-text mb-4">
+                    Art Pro Education
+                </h1>
+                
+                <p class="text-pink-700 text-lg font-medium mb-8">
+                    Đang khởi động ứng dụng kiểm tra âm nhạc...
+                </p>
+                
+                <div class="w-64 bg-pink-100/50 rounded-full h-3 mb-4 overflow-hidden">
+                    <div class="bg-gradient-to-r from-pink-400 to-rose-500 h-full rounded-full progress-bar"></div>
+                </div>
+                
+                <div class="flex justify-center items-center gap-2">
+                    <span class="pulse-icon text-xl">⏳</span>
+                    <span class="text-pink-600 font-medium">Vui lòng chờ...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Màn hình chính -->
+        <div id="homeScreen" class="glass p-8 text-center fade-in">
+            <header class="mb-8">
+                <div class="flex justify-center items-center mb-6">
+                    <span class="sparkle-icon text-2xl mr-2">✨</span>
+                    <span class="music-icon text-3xl mr-2">🎵</span>
+                    <span class="float-icon text-2xl mr-2">🌸</span>
+                </div>
+                <h1 class="text-4xl md:text-6xl fredoka gradient-text mb-2">
+                    Kiểm tra Âm nhạc
+                </h1>
+
+                <!-- Logo -->
+                <div class="mb-6 flex justify-center">
+                    <img src="https://i.postimg.cc/YSVpBGJQ/ART-PRO-2.png" 
+                         alt="Art Pro Logo" 
+                         class="w-20 h-20 rounded-full shadow-lg pulse-icon"
+                         onerror="this.style.display='none';">
+                </div>
+                <!-- End Logo -->
+                
+                <div class="flex justify-center items-center mb-4">
+                    <span class="sparkle-icon text-2xl ml-2">✨</span>
+                    <span class="music-icon text-3xl ml-2">🎶</span>
+                    <span class="float-icon text-2xl ml-2">🌸</span>
+                </div>
+                <p class="text-pink-700 text-lg md:text-xl font-medium">Ứng dụng hỗ trợ giáo viên tổ chức kiểm tra miệng chuyên nghiệp</p>
+            </header>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                <button onclick="selectGrade(6)" class="glass p-6 btn-hover text-pink-700 font-bold text-xl rounded-xl group">
+                    <div class="text-4xl mb-3 pulse-icon group-hover:scale-110 transition-transform">🌺</div>
+                    <div class="text-lg">Lớp 6</div>
+                </button>
+                <button onclick="selectGrade(7)" class="glass p-6 btn-hover text-pink-700 font-bold text-xl rounded-xl group">
+                    <div class="text-4xl mb-3 float-icon group-hover:scale-110 transition-transform">🌷</div>
+                    <div class="text-lg">Lớp 7</div>
+                </button>
+                <button onclick="selectGrade(8)" class="glass p-6 btn-hover text-pink-700 font-bold text-xl rounded-xl group">
+                    <div class="text-4xl mb-3 sparkle-icon group-hover:scale-110 transition-transform">🌹</div>
+                    <div class="text-lg">Lớp 8</div>
+                </button>
+                <button onclick="selectGrade(9)" class="glass p-6 btn-hover text-pink-700 font-bold text-xl rounded-xl group">
+                    <div class="text-4xl mb-3 music-icon group-hover:scale-110 transition-transform">🎓</div>
+                    <div class="text-lg">Lớp 9</div>
+                </button>
+            </div>
+            
+            <div class="flex justify-center gap-4">
+                <button onclick="showIntroduction()" class="glass px-8 py-4 btn-hover text-pink-700 font-semibold rounded-xl flex items-center gap-2">
+                    <span class="pulse-icon">👨‍💻</span> Giới thiệu
+                </button>
+            </div>
+        </div>
+
+        <!-- Màn hình thiết lập -->
+        <div id="setupScreen" class="glass p-8 hidden fade-in">
+            <header class="text-center mb-8">
+                <div class="flex justify-center items-center mb-4">
+                    <span class="sparkle-icon text-2xl mr-2">⚙️</span>
+                    <span class="float-icon text-2xl ml-2">🌸</span>
+                </div>
+                <h2 class="text-3xl fredoka gradient-text mb-2">Thiết lập Lượt thi</h2>
+                <p class="text-pink-700 font-medium">Khối lớp: <span id="selectedGrade" class="font-bold text-pink-800"></span></p>
+            </header>
+            
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <div class="glass p-6 rounded-xl">
+                    <label for="totalStudents" class="block text-pink-700 font-semibold mb-3 flex items-center gap-2">
+                        <span class="pulse-icon">👥</span> Tổng số học sinh:
+                    </label>
+                    <input type="number" id="totalStudents" min="1" max="50" value="30" 
+                           class="w-full p-3 rounded-lg border-0 bg-pink-50/50 text-pink-800 placeholder-pink-400 focus:bg-pink-50/80 focus:outline-none focus:ring-2 focus:ring-pink-300">
+                </div>
+                
+                <div class="glass p-6 rounded-xl">
+                    <label for="startNumber" class="block text-pink-700 font-semibold mb-3 flex items-center gap-2">
+                        <span class="sparkle-icon">🎯</span> STT bắt đầu:
+                    </label>
+                    <input type="number" id="startNumber" min="1" value="1" 
+                           class="w-full p-3 rounded-lg border-0 bg-pink-50/50 text-pink-800 placeholder-pink-400 focus:bg-pink-50/80 focus:outline-none focus:ring-2 focus:ring-pink-300">
+                </div>
+                
+                <div class="glass p-6 rounded-xl">
+                    <label class="block text-pink-700 font-semibold mb-3 flex items-center gap-2">
+                        <span class="float-icon">👫</span> Số học sinh mỗi lượt:
+                    </label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setGroupSize(1)" class="group-btn bg-pink-100/50 text-pink-700 p-3 rounded-lg btn-hover font-semibold">1</button>
+                        <button onclick="setGroupSize(2)" class="group-btn bg-pink-100/50 text-pink-700 p-3 rounded-lg btn-hover font-semibold">2</button>
+                        <button onclick="setGroupSize(3)" class="group-btn bg-pink-100/50 text-pink-700 p-3 rounded-lg btn-hover font-semibold">3</button>
+                        <button onclick="setGroupSize(4)" class="group-btn bg-pink-100/50 text-pink-700 p-3 rounded-lg btn-hover font-semibold">4</button>
+                        <button onclick="setGroupSize(5)" class="group-btn bg-pink-100/50 text-pink-700 p-3 rounded-lg btn-hover font-semibold">5</button>
+                        <button onclick="setGroupSize('random')" class="group-btn bg-pink-100/50 text-pink-700 p-3 rounded-lg btn-hover font-semibold">
+                            <span class="pulse-icon">🎲</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="glass p-6 rounded-xl">
+                    <label class="block text-pink-700 font-semibold mb-3 flex items-center gap-2">
+                        <span class="music-icon">🎵</span> Chọn nội dung:
+                    </label>
+                    <div class="space-y-3">
+                        <button onclick="setContentMode('random')" class="content-btn w-full bg-pink-100/50 text-pink-700 p-3 rounded-lg btn-hover text-left font-medium flex items-center gap-2">
+                            <span class="sparkle-icon">🎲</span> Chọn ngẫu nhiên
+                        </button>
+                        <button onclick="setContentMode('specific')" class="content-btn w-full bg-pink-100/50 text-pink-700 p-3 rounded-lg btn-hover text-left font-medium flex items-center gap-2">
+                            <span class="pulse-icon">🎯</span> Chọn cụ thể
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="specificContent" class="glass p-6 rounded-xl mb-6 hidden">
+                <label class="block text-pink-700 font-semibold mb-3 flex items-center gap-2">
+                    <span class="float-icon">📋</span> Chọn bài hát:
+                </label>
+                <select id="songSelect" class="w-full p-3 rounded-lg border-0 bg-pink-50/50 text-pink-800 focus:bg-pink-50/80 focus:outline-none focus:ring-2 focus:ring-pink-300">
+                </select>
+            </div>
+            
+            <div class="flex justify-center gap-4">
+                <button onclick="goHome()" class="glass px-6 py-3 btn-hover text-pink-700 font-semibold rounded-lg flex items-center gap-2">
+                    <span class="float-icon">←</span> Quay lại
+                </button>
+                <button onclick="startExam()" class="bg-gradient-to-r from-pink-400 to-rose-500 px-8 py-3 btn-hover text-white font-bold rounded-lg flex items-center gap-2">
+                    <span class="pulse-icon">🚀</span> Bắt đầu kiểm tra
+                </button>
+            </div>
+        </div>
+
+        <!-- Màn hình trình chiếu -->
+        <div id="examScreen" class="glass p-6 md:p-8 hidden fade-in">
+            <header class="text-center mb-4">
+                <h2 class="text-3xl fredoka gradient-text" id="examTitle">Kiểm tra Âm nhạc</h2>
+            </header>
+            
+            <!-- Vùng hiển thị thông tin nhóm và tiến độ (Dùng flex-col trên mobile để tránh kéo dài) -->
+            <div class="glass p-3 md:p-4 rounded-xl mb-4">
+                <div class="text-pink-700 font-semibold flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6 flex-wrap">
+                    <span class="flex items-center gap-1">
+                        <span class="pulse-icon text-xl">👥</span>
+                        <span id="currentGroup">Nhóm 1</span>
+                    </span>
+                    <span class="text-pink-400 hidden md:inline">|</span>
+                    <!-- Hiển thị STT rõ ràng và nổi bật -->
+                    <span class="flex items-center gap-1 font-bold text-rose-600 text-lg">
+                        <span class="float-icon text-xl">📝</span>
+                        <span id="studentNumbers">STT Học sinh: 1-3</span>
+                    </span>
+                    <span class="text-pink-400 hidden md:inline">|</span>
+                    <span class="flex items-center gap-1">
+                        <span class="sparkle-icon text-xl">📊</span>
+                        <span id="progress">Đã kiểm tra: 0/30</span>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Vùng hiển thị Nội dung bài hát và Video -->
+            <div class="glass p-4 rounded-xl mb-6 text-center">
+                
+                <!-- Tên Bài Hát (đã xóa đề bài kiểm tra) -->
+                <p class="text-xl text-pink-600 font-medium mb-1">Em hãy trình bày bài:</p>
+
+                <div class="flex justify-center items-center mb-3">
+                    <span class="music-icon text-2xl mr-2">🎶</span>
+                    <h4 class="text-3xl font-extrabold fredoka text-rose-700" id="currentSong">Đang tải...</h4>
+                    <span class="music-icon text-2xl ml-2">🎶</span>
+                </div>
+                
+                <div id="videoContainer" class="aspect-video bg-gradient-to-br from-pink-100/30 to-rose-100/30 rounded-xl overflow-hidden border-2 border-pink-200/50 relative">
+                    <iframe id="youtubePlayer" width="100%" height="100%" frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen></iframe>
+                </div>
+            </div>
+            
+            <!-- Vùng điều khiển (Nút bấm) -->
+            <div class="flex justify-center gap-3 flex-wrap">
+                <!-- Nút Start Video -->
+                <button onclick="startVideo()" class="start-video-btn px-6 py-3 btn-hover flex items-center gap-2 text-sm md:text-base">
+                    <span class="pulse-icon">▶️</span> Bắt đầu Video (Mở âm thanh)
+                </button>
+                
+                <button onclick="previousGroup()" class="glass px-4 py-3 btn-hover text-pink-700 font-semibold rounded-lg flex items-center gap-2 text-sm md:text-base" id="prevBtn">
+                    <span class="float-icon">←</span> Nhóm trước
+                </button>
+                <button onclick="nextGroup()" class="bg-gradient-to-r from-pink-400 to-rose-500 px-6 py-3 btn-hover text-white font-bold rounded-lg flex items-center gap-2 text-sm md:text-base" id="nextBtn">
+                    Nhóm tiếp theo <span class="pulse-icon">→</span>
+                </button>
+                <button onclick="goHome()" class="glass px-4 py-3 btn-hover text-pink-700 font-semibold rounded-lg flex items-center gap-2 text-sm md:text-base">
+                    <span class="sparkle-icon">🏠</span> Trang chủ
+                </button>
+            </div>
+        </div>
+
+        <!-- Màn hình kết thúc -->
+        <div id="finishScreen" class="glass p-8 text-center hidden fade-in">
+            <div class="flex justify-center items-center mb-6">
+                <span class="sparkle-icon text-4xl mr-2">🎉</span>
+                <span class="pulse-icon text-5xl mx-2">🏆</span>
+                <span class="sparkle-icon text-4xl ml-2">🎉</span>
+            </div>
+            <h2 class="text-4xl fredoka gradient-text mb-4">Chúc mừng!</h2>
+            <p class="text-pink-700 text-xl font-medium mb-8">Đã hoàn thành kiểm tra cho tất cả học sinh</p>
+            <div class="flex justify-center items-center gap-3 mb-8">
+                <span class="music-icon text-3xl">🎵</span>
+                <span class="float-icon text-3xl">🎶</span>
+                <span class="pulse-icon text-3xl">🎤</span>
+                <span class="sparkle-icon text-3xl">🎸</span>
+                <span class="music-icon text-3xl">🎹</span>
+            </div>
+            <button onclick="goHome()" class="bg-gradient-to-r from-pink-400 to-rose-500 px-8 py-4 btn-hover text-white font-bold rounded-xl text-xl flex items-center gap-2 mx-auto">
+                <span class="pulse-icon">🏠</span> Về trang chủ
+            </button>
+        </div>
+
+        <!-- Màn hình giới thiệu -->
+        <div id="introductionScreen" class="glass p-8 hidden fade-in max-h-screen overflow-y-auto">
+            <header class="text-center mb-8">
+                <div class="flex justify-center items-center mb-6">
+                    <img src="https://i.postimg.cc/YSVpBGJQ/ART-PRO-2.png" 
+                         alt="Art Pro Logo" 
+                         class="w-20 h-20 rounded-full shadow-lg pulse-icon"
+                         onerror="this.style.display='none';">
+                </div>
+                <h2 class="text-3xl fredoka gradient-text mb-2">Giới thiệu</h2>
+                <p class="text-pink-700 font-medium">Ứng dụng Kiểm tra Âm nhạc</p>
+            </header>
+            
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <!-- Thông tin tác giả -->
+                <div class="glass p-6 rounded-xl text-center">
+                    <div class="flex justify-center items-center mb-4">
+                        <span class="sparkle-icon text-3xl mr-2">👨‍💻</span>
+                        <span class="pulse-icon text-3xl ml-2">✨</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-pink-700 mb-3">Người tạo</h3>
+                    <div class="text-3xl fredoka gradient-text mb-3">Tuấn Anh</div>
+                    <p class="text-pink-600 font-medium mb-4">Developer & Educator</p>
+                    <div class="flex justify-center items-center gap-2 text-pink-600">
+                        <span class="music-icon">🎵</span>
+                        <span>Chuyên gia giáo dục âm nhạc</span>
+                        <span class="music-icon">🎵</span>
+                    </div>
+                </div>
+                
+                <!-- QR Code ủng hộ -->
+                <div class="glass p-6 rounded-xl text-center">
+                    <div class="flex justify-center items-center mb-4">
+                        <span class="float-icon text-2xl mr-2">💝</span>
+                        <span class="sparkle-icon text-2xl ml-2">🙏</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-pink-700 mb-4">Ủng hộ tác giả</h3>
+                    <div class="mb-4">
+                        <img src="https://i.postimg.cc/WzN1bBJy/QR-TUAN-ANH.png" 
+                             alt="QR Code ủng hộ" 
+                             class="w-32 h-32 mx-auto rounded-lg shadow-lg pulse-icon"
+                             onerror="this.style.display='none';">
+                    </div>
+                    <p class="text-pink-600 text-sm mb-3">Quét mã QR để ủng hộ</p>
+                    <a href="https://i.postimg.cc/WzN1bBJy/QR-TUAN-ANH.png" 
+                       download="QR-UNG-HO-TUAN-ANH.png"
+                       class="glass px-4 py-2 btn-hover text-pink-700 font-semibold rounded-lg inline-flex items-center gap-2 text-sm">
+                        <span class="sparkle-icon">📱</span> Tải QR Code
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Tính năng ứng dụng -->
+            <div class="glass p-6 rounded-xl mb-6">
+                <h3 class="text-xl font-bold text-pink-700 mb-4 text-center flex items-center justify-center gap-2">
+                    <span class="music-icon">🎯</span> Tính năng nổi bật
+                </h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 p-3 bg-pink-50/30 rounded-lg">
+                        <span class="pulse-icon text-2xl">🎵</span>
+                        <span class="text-pink-700 font-medium">Tích hợp video karaoke</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-pink-50/30 rounded-lg">
+                        <span class="sparkle-icon text-2xl">👥</span>
+                        <span class="text-pink-700 font-medium">Quản lý nhóm linh hoạt</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-pink-50/30 rounded-lg">
+                        <span class="float-icon text-2xl">📱</span>
+                        <span class="text-pink-700 font-medium">Giao diện thân thiện</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-pink-50/30 rounded-lg">
+                        <span class="music-icon text-2xl">⚡</span>
+                        <span class="text-pink-700 font-medium">Hiệu suất cao</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button onclick="goHome()" class="glass px-6 py-3 btn-hover text-pink-700 font-semibold rounded-lg flex items-center gap-2 mx-auto">
+                    <span class="float-icon">←</span> Quay lại trang chủ
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Dữ liệu bài hát theo khối lớp đã được cập nhật
+        const songData = {
+            6: [
+                { name: "Em yêu giờ học hát", id: "YWpjl-U2Ab0" },
+                { name: "Bài đọc nhạc số 1 lớp 6", id: "wNQ5lMJoUtI" },
+                { name: "Lý cây đa", id: "AM-9EtA2OxM" }
+            ],
+            7: [
+                { name: "Ước mơ mùa khai trường", id: "pu5flmJvREE" },
+                { name: "Bài đọc nhạc số 1 lớp 7", id: "XgvauCD74w4" },
+                { name: "Đi cấy", id: "ASZ0mBgg9Oo" }
+            ],
+            8: [
+                { name: "Khúc ca bốn mùa", id: "A8zp5xLFt7I" },
+                { name: "Bài đọc nhạc số 1 lớp 8", id: "eRe4ZSpaDGM" },
+                { name: "Bản làng tươi đẹp", id: "hP0e5La7pYY" }
+            ],
+            9: [
+                { name: "Tuổi mười lăm", id: "DQrB7v0W9nk" },
+                { name: "Bài đọc nhạc số 1 lớp 9", id: "kpFX0nVZ55Y" },
+                { name: "Quê hương thanh bình", id: "imS6uiDjkag" }
+            ]
+        };
+
+        // Biến trạng thái
+        let currentGrade = null;
+        let totalStudents = 30;
+        let startNumber = 1;
+        let groupSize = 1;
+        let contentMode = 'random';
+        let selectedSong = null;
+        let currentGroupIndex = 0;
+        let groups = [];
+        let currentVideoId = null; // Thêm biến lưu ID video hiện tại
+
+        // Hiển thị màn hình
+        function showScreen(screenId) {
+            const screens = ['loadingScreen', 'homeScreen', 'setupScreen', 'examScreen', 'finishScreen', 'introductionScreen'];
+            screens.forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+            document.getElementById(screenId).classList.add('fade-in');
+        }
+
+        // Chọn khối lớp
+        function selectGrade(grade) {
+            currentGrade = grade;
+            document.getElementById('selectedGrade').textContent = `Lớp ${grade}`;
+            
+            // Cập nhật danh sách bài hát
+            const songSelect = document.getElementById('songSelect');
+            songSelect.innerHTML = '';
+            songData[grade].forEach(song => {
+                const option = document.createElement('option');
+                option.value = song.id;
+                option.textContent = song.name;
+                songSelect.appendChild(option);
+            });
+            
+            showScreen('setupScreen');
+        }
+
+        // Thiết lập kích thước nhóm
+        function setGroupSize(size) {
+            groupSize = size;
+            document.querySelectorAll('.group-btn').forEach(btn => {
+                btn.classList.remove('bg-pink-400', 'text-white');
+                btn.classList.add('bg-pink-100/50', 'text-pink-700');
+            });
+            // Sử dụng event.target để lấy nút được click
+            const target = event.target.closest('button');
+            if (target) {
+                target.classList.remove('bg-pink-100/50', 'text-pink-700');
+                target.classList.add('bg-pink-400', 'text-white');
+            }
+        }
+
+        // Thiết lập chế độ nội dung
+        function setContentMode(mode) {
+            contentMode = mode;
+            document.querySelectorAll('.content-btn').forEach(btn => {
+                btn.classList.remove('bg-pink-400', 'text-white');
+                btn.classList.add('bg-pink-100/50', 'text-pink-700');
+            });
+            // Sử dụng event.target để lấy nút được click
+            const target = event.target.closest('button');
+            if (target) {
+                target.classList.remove('bg-pink-100/50', 'text-pink-700');
+                target.classList.add('bg-pink-400', 'text-white');
+            }
+            
+            const specificContent = document.getElementById('specificContent');
+            if (mode === 'specific') {
+                specificContent.classList.remove('hidden');
+            } else {
+                specificContent.classList.add('hidden');
+            }
+        }
+
+        // Tạo nhóm học sinh
+        function createGroups() {
+            groups = [];
+            totalStudents = parseInt(document.getElementById('totalStudents').value) || 0;
+            startNumber = parseInt(document.getElementById('startNumber').value) || 1;
+            
+            if (totalStudents <= 0 || startNumber <= 0 || startNumber > totalStudents) {
+                // Xử lý lỗi nếu dữ liệu không hợp lệ
+                console.error("Dữ liệu học sinh không hợp lệ.");
+                return;
+            }
+
+            let currentStudent = startNumber;
+            
+            while (currentStudent <= totalStudents) {
+                const currentGroupSize = groupSize === 'random' ? 
+                    Math.min(Math.floor(Math.random() * 5) + 1, totalStudents - currentStudent + 1) : 
+                    Math.min(groupSize, totalStudents - currentStudent + 1);
+                
+                const group = [];
+                for (let i = 0; i < currentGroupSize; i++) {
+                    group.push(currentStudent);
+                    currentStudent++;
+                }
+                
+                if (group.length > 0) {
+                    groups.push(group);
+                }
+            }
+        }
+
+        // Bắt đầu kiểm tra
+        function startExam() {
+            createGroups();
+            currentGroupIndex = 0;
+            
+            if (contentMode === 'specific') {
+                const songSelect = document.getElementById('songSelect');
+                const selectedId = songSelect.value;
+                selectedSong = songData[currentGrade].find(song => song.id === selectedId);
+            }
+            
+            if (groups.length === 0) {
+                 // Đây là nơi bạn sẽ hiển thị một thông báo thay vì alert()
+                 console.error("Không có học sinh nào để kiểm tra. Vui lòng kiểm tra lại thiết lập.");
+                 return;
+            }
+
+            showScreen('examScreen');
+            updateExamDisplay();
+        }
+
+        // Bắt đầu phát video (có tiếng)
+        function startVideo() {
+            if (currentVideoId) {
+                const iframe = document.getElementById('youtubePlayer');
+                // Tải lại iframe với autoplay=1 và mute=0 (mở tiếng)
+                iframe.src = `https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0`;
+            }
+        }
+
+
+        // Cập nhật hiển thị kiểm tra
+        function updateExamDisplay() {
+            if (currentGroupIndex >= groups.length) {
+                showScreen('finishScreen');
+                return;
+            }
+            
+            const currentGroup = groups[currentGroupIndex];
+            
+            // Chọn bài hát: ngẫu nhiên hoặc cụ thể
+            let song;
+            if (contentMode === 'random') {
+                const songs = songData[currentGrade];
+                song = songs[Math.floor(Math.random() * songs.length)]; 
+            } else {
+                // Đảm bảo selectedSong được đặt đúng
+                song = selectedSong; 
+            }
+
+            // Lưu ID video hiện tại
+            currentVideoId = song ? song.id : null;
+
+            // Cập nhật thông tin trên màn hình
+            document.getElementById('currentGroup').textContent = `Nhóm ${currentGroupIndex + 1}`;
+            // Cập nhật STT rõ ràng hơn
+            document.getElementById('studentNumbers').textContent = `STT Học sinh: ${currentGroup.join(', ')}`;
+            
+            // Tính toán số học sinh đã kiểm tra
+            let checkedStudents = 0;
+            for(let i = 0; i <= currentGroupIndex; i++) {
+                checkedStudents += groups[i].length;
+            }
+            document.getElementById('progress').textContent = 
+                `Đã kiểm tra: ${checkedStudents}/${totalStudents}`;
+
+            document.getElementById('currentSong').textContent = song ? song.name : "Không tìm thấy bài hát";
+            
+            // Cập nhật video YouTube (Không Autoplay ban đầu)
+            const iframe = document.getElementById('youtubePlayer');
+            if (currentVideoId) {
+                 // Không thêm tham số autoplay để video không tự động phát
+                iframe.src = `https://www.youtube.com/embed/${currentVideoId}?rel=0`;
+            } else {
+                iframe.src = ''; // Clear iframe if no song is found
+            }
+            
+            // Cập nhật nút điều hướng
+            document.getElementById('prevBtn').style.display = currentGroupIndex === 0 ? 'none' : 'inline-block';
+            document.getElementById('nextBtn').textContent = 
+                currentGroupIndex === groups.length - 1 ? 'Kết thúc' : 'Nhóm tiếp theo →';
+        }
+
+        // Nhóm tiếp theo
+        function nextGroup() {
+            currentGroupIndex++;
+            updateExamDisplay();
+        }
+
+        // Nhóm trước
+        function previousGroup() {
+            if (currentGroupIndex > 0) {
+                currentGroupIndex--;
+                updateExamDisplay();
+            }
+        }
+
+        // Về trang chủ
+        function goHome() {
+            // Dừng video đang phát trước khi về trang chủ
+            const iframe = document.getElementById('youtubePlayer');
+            iframe.src = ''; 
+            
+            showScreen('homeScreen');
+            // Reset trạng thái
+            currentGrade = null;
+            currentGroupIndex = 0;
+            groups = [];
+            currentVideoId = null;
+        }
+
+        // Hiển thị giới thiệu
+        function showIntroduction() {
+            showScreen('introductionScreen');
+        }
+
+        // Khởi tạo ứng dụng
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hiển thị màn hình loading trước
+            showScreen('loadingScreen');
+            
+            // Sau 3.5 giây chuyển sang màn hình chính
+            setTimeout(() => {
+                showScreen('homeScreen');
+                // Thiết lập giá trị mặc định cho UI
+                // Kích hoạt nút mặc định cho Group Size (1)
+                const defaultGroupBtn = document.querySelector('.group-btn:nth-child(1)');
+                if (defaultGroupBtn) {
+                     defaultGroupBtn.classList.remove('bg-pink-100/50', 'text-pink-700');
+                     defaultGroupBtn.classList.add('bg-pink-400', 'text-white');
+                }
+                // Kích hoạt nút mặc định cho Content Mode (random)
+                const randomContentBtn = document.querySelector('.content-btn:nth-child(1)');
+                 if (randomContentBtn) {
+                     randomContentBtn.classList.remove('bg-pink-100/50', 'text-pink-700');
+                     randomContentBtn.classList.add('bg-pink-400', 'text-white');
+                }
+            }, 3500);
+        });
+    </script>
+</body>
+</html>
