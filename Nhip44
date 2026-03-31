@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="vi">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trò Chơi Học Nhịp 4/4</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@700&display=swap" rel="stylesheet">
+  <style>
+        :root {
+            --primary-color: #ed64a6;
+            --secondary-color: #f687b3;
+            --accent-color: #fbb6ce;
+        }
+
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--accent-color) 0%, var(--secondary-color) 50%, var(--primary-color) 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #2d3748;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Loading Screen */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #fce3ec, #f9c9dd);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        .loading-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px 60px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 90%;
+            width: 500px;
+        }
+        .loading-logo {
+            width: 150px;
+            height: auto;
+            margin: 0 auto 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .loading-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .loading-subtitle {
+            font-size: 1rem;
+            color: #718096;
+            margin-bottom: 25px;
+        }
+        .loading-progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        .loading-progress-fill {
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 5px;
+            animation: loadingAnimation 2.5s ease-out forwards;
+        }
+        @keyframes loadingAnimation {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+        .loading-text {
+            font-size: 0.9rem;
+            color: #a0aec0;
+        }
+        .fredoka { 
+            font-family: 'Fredoka', sans-serif; 
+        }
+
+        /* Floating musical notes animation */
+        body::before {
+            content: '🎵 🎶 🎼 🎹 🎺 🎸 🥁 🎤';
+            position: fixed;
+            top: -50px;
+            left: -50px;
+            right: -50px;
+            bottom: -50px;
+            font-size: 2rem;
+            opacity: 0.1;
+            animation: floatingNotes 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        @keyframes floatingNotes {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100vh) rotate(360deg); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 
+                0 30px 60px rgba(237, 100, 166, 0.2),
+                0 15px 30px rgba(246, 135, 179, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            position: relative;
+            z-index: 1;
+            animation: containerGlow 4s ease-in-out infinite alternate;
+            display: none; /* Hidden initially */
+        }
+
+        @keyframes containerGlow {
+            0% { 
+                box-shadow: 
+                    0 30px 60px rgba(237, 100, 166, 0.2),
+                    0 15px 30px rgba(246, 135, 179, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            }
+            100% { 
+                box-shadow: 
+                    0 35px 70px rgba(237, 100, 166, 0.3),
+                    0 20px 40px rgba(246, 135, 179, 0.25),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .header::before {
+            content: '🎼✨🎵✨🎶✨🎼';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            animation: sparkle 2s ease-in-out infinite;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color), var(--secondary-color), var(--primary-color));
+            border-radius: 2px;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0.7; transform: translateX(-50%) scale(1); }
+            50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -150px 0; }
+            100% { background-position: 150px 0; }
+        }
+
+        .game-title {
+            font-size: 3.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 30%, var(--accent-color) 60%, var(--primary-color) 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+            animation: titleGradient 4s ease-in-out infinite, titleBounce 6s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(237, 100, 166, 0.3);
+            position: relative;
+        }
+
+        .game-title::before {
+            content: '🎵ÂM NHẠC - NHỊP 4/4🎵';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, rgba(237, 100, 166, 0.2), rgba(246, 135, 179, 0.2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: blur(2px);
+            z-index: -1;
+        }
+
+        @keyframes titleGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes titleBounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .welcome-text {
+            font-size: 1.3rem;
+            color: #718096;
+            margin-bottom: 20px;
+            font-weight: 400;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 10px;
+            box-shadow: 
+                0 10px 40px rgba(237, 100, 166, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tabs::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(237, 100, 166, 0.1), transparent);
+            animation: tabsShine 3s ease-in-out infinite;
+        }
+
+        @keyframes tabsShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .tab {
+            padding: 18px 30px;
+            margin: 0 8px;
+            border: none;
+            border-radius: 18px;
+            background: transparent;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #4a5568;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(237, 100, 166, 0.2), transparent);
+            transition: left 0.6s ease;
+            z-index: -1;
+        }
+
+        .tab:hover {
+            transform: translateY(-2px);
+            color: var(--primary-color);
+            background: rgba(237, 100, 166, 0.1);
+            box-shadow: 0 8px 25px rgba(237, 100, 166, 0.2);
+        }
+
+        .tab:hover::before {
+            left: 100%;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, var(--accent-color) 100%);
+            color: white;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(237, 100, 166, 0.4);
+            animation: tabPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes tabPulse {
+            0%, 100% { box-shadow: 0 12px 30px rgba(237, 100, 166, 0.4); }
+            50% { box-shadow: 0 15px 35px rgba(237, 100, 166, 0.6); }
+        }
+
+        .tab-content { display: none; animation: fadeIn 0.5s ease; }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Common styles for all tabs */
+        .tab-inner-container {
+            border-radius: 25px;
+            padding: 40px;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Rhythm Simulator */
+        .rhythm-simulator {
+            background: linear-gradient(135deg, rgba(255, 236, 210, 0.9) 0%, rgba(252, 182, 159, 0.9) 100%);
+        }
+
+        .beat-display { display: flex; justify-content: center; gap: 25px; margin: 40px 0; flex-wrap: wrap; }
+        .beat {
+            width: 110px; height: 110px; border-radius: 50%; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; font-size: 1.9rem; font-weight: 700;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); border: 4px solid rgba(255,255,255,0.4);
+            position: relative; overflow: hidden; animation: beatFloat 3s ease-in-out infinite;
+        }
+        .beat:hover { transform: scale(1.05) translateY(-5px); border-color: rgba(255,255,255,0.8); }
+        @keyframes beatFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-3px); } }
+        .beat small { font-size: 0.8rem; font-weight: 500; margin-top: 5px; }
+        .beat.strong { background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%); color: white; box-shadow: 0 8px 25px rgba(229, 62, 62, 0.3); }
+        .beat.weak { background: linear-gradient(135deg, #90cdf4 0%, #63b3ed 100%); color: #2d3748; box-shadow: 0 8px 25px rgba(144, 205, 244, 0.3); }
+        .beat.medium { background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%); color: white; box-shadow: 0 8px 25px rgba(246, 173, 85, 0.3); }
+        .beat.active {
+            transform: scale(1.25) translateY(-8px);
+            box-shadow: 0 20px 50px rgba(229, 62, 62, 0.6), 0 0 30px rgba(237, 100, 166, 0.4);
+            border-color: rgba(255,255,255,1); animation: beatActive 0.6s ease-in-out, beatFloat 3s ease-in-out infinite;
+        }
+        @keyframes beatActive { 0% { transform: scale(1) translateY(0px); } 50% { transform: scale(1.3) translateY(-10px); } 100% { transform: scale(1.25) translateY(-8px); } }
+        
+        .controls { margin: 30px 0; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .btn { padding: 15px 30px; border: none; border-radius: 20px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; min-width: 120px; }
+        .btn:hover::before { left: 100%; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, var(--accent-color) 100%); color: white; box-shadow: 0 8px 25px rgba(237, 100, 166, 0.3); }
+        .btn-primary:hover { transform: translateY(-4px); box-shadow: 0 15px 40px rgba(237, 100, 166, 0.5); background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 50%, #d53f8c 100%); }
+        .btn-secondary { background: linear-gradient(135deg, #f6ad55, #ed8936); color: white; box-shadow: 0 8px 25px rgba(246, 173, 85, 0.3); }
+        .btn-secondary:hover { transform: translateY(-4px); box-shadow: 0 15px 40px rgba(246, 173, 85, 0.5); }
+        .tempo-control { margin: 30px auto; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); padding: 25px; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2); max-width: 500px; text-align: center; }
+        .tempo-control label { font-size: 1.2rem; font-weight: 600; color: #4a5568; margin-right: 15px; }
+        .tempo-slider { width: 70%; max-width: 300px; height: 8px; margin: 0 20px; background: linear-gradient(90deg, #e2e8f0, #cbd5e0); border-radius: 4px; outline: none; -webkit-appearance: none; vertical-align: middle; }
+        .tempo-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); border-radius: 50%; cursor: pointer; box-shadow: 0 4px 12px rgba(237, 100, 166, 0.4); transition: all 0.3s ease; }
+        .tempo-slider::-webkit-slider-thumb:hover { transform: scale(1.2); box-shadow: 0 6px 20px rgba(237, 100, 166, 0.6); }
+        #tempoDisplay { font-size: 1.2rem; font-weight: 700; color: #2d3748; background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; vertical-align: middle; }
+
+        /* Quiz & Theory Styles */
+        .quiz-container, .theory-container { background: linear-gradient(135deg, rgba(251, 235, 243, 0.9) 0%, rgba(246, 214, 227, 0.9) 100%); }
+        .quiz-container h2, .theory-container h2 { text-align: center; font-size: 2.5rem; margin-bottom: 40px; background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .progress-bar { width: 100%; height: 12px; background: rgba(226, 232, 240, 0.8); border-radius: 6px; overflow: hidden; margin: 25px 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 50%, #d53f8c 100%); transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 6px; }
+        .score-display { text-align: center; font-size: 1.8rem; font-weight: 700; background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin: 25px 0; }
+        .question { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 30px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2); }
+        .options { display: grid; gap: 12px; }
+        .option { padding: 18px 20px; border: 2px solid rgba(226, 232, 240, 0.8); border-radius: 15px; cursor: pointer; transition: all 0.4s ease; background: rgba(247, 250, 252, 0.8); font-weight: 500; }
+        .option:hover { border-color: var(--primary-color); background: rgba(251, 235, 243, 0.9); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(237, 100, 166, 0.2); }
+        .option.correct { border-color: #48bb78; background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white; }
+        .option.incorrect { border-color: #f56565; background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%); color: white; }
+
+        /* AI Teacher */
+        .ai-teacher { background: linear-gradient(135deg, rgba(210, 153, 194, 0.9) 0%, rgba(254, 249, 215, 0.9) 100%); }
+        .teacher-avatar { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; margin: 0 auto 25px; box-shadow: 0 15px 35px rgba(237, 100, 166, 0.3); border: 4px solid rgba(255,255,255,0.3); animation: avatarPulse 2s ease-in-out infinite; }
+        @keyframes avatarPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .chat-container { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 20px; padding: 25px; margin-top: 25px; max-height: 400px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2); }
+        .message { margin-bottom: 20px; padding: 18px 22px; border-radius: 15px; line-height: 1.6; font-weight: 500; }
+        .message.user { background: linear-gradient(135deg, rgba(251, 235, 243, 0.9) 0%, rgba(246, 214, 227, 0.9) 100%); margin-left: auto; border-left: 4px solid var(--primary-color); max-width: 80%; }
+        .message.ai { background: linear-gradient(135deg, rgba(240, 255, 244, 0.9) 0%, rgba(198, 246, 213, 0.9) 100%); margin-right: auto; border-left: 4px solid #48bb78; max-width: 80%; }
+        .input-container { display: flex; gap: 15px; margin-top: 20px; }
+        .question-input { flex: 1; padding: 18px 20px; border: 2px solid rgba(226, 232, 240, 0.8); border-radius: 15px; font-size: 1.1rem; background: rgba(255, 255, 255, 0.9); transition: all 0.3s ease; }
+        .question-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(237, 100, 166, 0.1); background: rgba(255, 255, 255, 1); }
+
+        /* About Section - New Layout */
+        #about .tab-inner-container {
+            padding: 20px;
+            background: transparent;
+            box-shadow: none;
+            border: none;
+        }
+        .about-header { text-align: center; margin-bottom: 40px; }
+        .about-header img { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 3px solid white; }
+        .about-header h2 { font-size: 2.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 5px; }
+        .about-header p { font-size: 1.1rem; color: #718096; }
+        
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
+        .about-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 15px 30px rgba(0,0,0,0.1); text-align: center; }
+        .about-card h3 { font-size: 1.5rem; font-weight: 600; margin-bottom: 15px; color: #333; }
+        .about-card p { color: #666; margin-bottom: 15px; line-height: 1.6; }
+        .creator-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            border: 3px solid var(--accent-color);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            object-fit: cover;
+        }
+        .support-card .qr-code { width: 150px; height: 150px; margin: 0 auto 20px; border-radius: 10px; border: 2px solid #eee; padding: 5px; }
+        .support-card .btn { margin-top: 10px; }
+
+        .features-section { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .features-section h3 { text-align: center; font-size: 1.8rem; font-weight: 600; margin-bottom: 25px; color: #333; }
+        .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .feature-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: #f7fafc; border-radius: 12px; }
+        .feature-icon { font-size: 1.8rem; color: var(--primary-color); }
+        .feature-text { font-size: 1rem; font-weight: 500; color: #4a5568; }
+
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { padding: 20px; }
+            .game-title { font-size: 2.2rem; }
+            .tabs { flex-direction: column; padding: 5px; }
+            .tab { margin: 5px 0; }
+            .beat-display { gap: 15px; }
+            .beat { width: 70px; height: 70px; font-size: 1.4rem; }
+            .tab-inner-container { padding: 20px; }
+            .input-container { flex-direction: column; }
+            .tempo-slider { width: 100%; margin: 0 0 10px 0; }
+            .about-grid { grid-template-columns: 1fr; }
+            .features-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+ </head>
+ <body>
+
+    <!-- Màn hình khởi động -->
+    <div id="loadingScreen">
+        <div class="loading-container">
+            <img src="https://i.postimg.cc/QMVXzkYz/ART-PRO-EDUCATION.jpg" alt="Art Pro Education Logo" class="loading-logo" onerror="this.src='https://placehold.co/150x85/ed64a6/ffffff?text=Logo';">
+            <h1 class="loading-title fredoka">Art Pro Education</h1>
+            <p class="loading-subtitle">Đang khởi động ứng dụng kiểm tra âm nhạc...</p>
+            <div class="loading-progress-bar">
+                <div class="loading-progress-fill"></div>
+            </div>
+            <p class="loading-text">⌛ Vui lòng chờ...</p>
+        </div>
+    </div>
+
+
+  <div class="container">
+   <div class="header">
+    <h1 class="game-title">🎵ÂM NHẠC - NHỊP 4/4🎵</h1>
+    <p class="welcome-text">Chào mừng các em đến với ứng dụng học âm nhạc chuyên nghiệp!</p>
+   </div>
+   <div class="tabs"><button class="tab active" onclick="showTab('simulator')">🎼 Mô Phỏng Nhịp</button> <button class="tab" onclick="showTab('theory')">📚 Lý Thuyết</button> <button class="tab" onclick="showTab('quiz')">📝 Trắc Nghiệm</button> <button class="tab" onclick="showTab('ai-teacher')">🤖 AI Giáo Viên</button> <button class="tab" onclick="showTab('about')">ℹ️ Giới Thiệu</button>
+   </div><!-- Rhythm Simulator Tab -->
+   <div id="simulator" class="tab-content active">
+    <div class="rhythm-simulator tab-inner-container">
+     <h2 style="text-align: center; margin-bottom: 30px; font-size: 2rem; font-weight: 700;">🎵 Mô Phỏng Nhịp 4/4</h2>
+     <p style="text-align: center; font-size: 1.2rem; font-weight: 600; color: #4a5568; margin: 20px 0;"><strong>Mô phỏng: Mạnh - Nhẹ - Mạnh vừa - Nhẹ</strong></p>
+     <div class="beat-display">
+      <div class="beat strong" id="beat1">
+       1<br><small>Mạnh</small>
+      </div>
+      <div class="beat weak" id="beat2">
+       2<br><small>Nhẹ</small>
+      </div>
+      <div class="beat medium" id="beat3">
+       3<br><small>Mạnh vừa</small>
+      </div>
+      <div class="beat weak" id="beat4">
+       4<br><small>Nhẹ</small>
+      </div>
+     </div>
+     <div class="controls"><button class="btn btn-primary" onclick="startRhythm()">▶️ Bắt Đầu</button> <button class="btn btn-secondary" onclick="stopRhythm()">⏹️ Dừng</button>
+     </div>
+     <div class="tempo-control"><label>Tốc độ: </label> <input type="range" class="tempo-slider" min="60" max="140" value="100" id="tempoSlider" onchange="updateTempo()"> <span id="tempoDisplay">100 BPM</span>
+     </div>
+    </div>
+   </div><!-- Theory Tab -->
+   <div id="theory" class="tab-content">
+    <div class="theory-container tab-inner-container">
+     <h2>📚 Lý Thuyết Nhịp 4/4</h2>
+     <p>Nội dung lý thuyết chi tiết về nhịp 4/4, cấu trúc phách, cách đánh nhịp và các ví dụ thực tế sẽ được trình bày ở đây...</p>
+     <!-- Full theory content would go here -->
+    </div>
+   </div><!-- Quiz Tab -->
+   <div id="quiz" class="tab-content">
+    <div class="quiz-container tab-inner-container">
+     <h2>📝 Trắc Nghiệm Nhịp 4/4</h2>
+     <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+     </div>
+     <div class="score-display">
+      Điểm: <span id="score">0</span>
+     </div>
+     <div id="quizQuestions"></div>
+     <div style="text-align: center; margin-top: 20px;"><button class="btn btn-primary" onclick="generateNewQuiz()">🔄 Tạo Bài Mới</button> <button class="btn btn-secondary" onclick="resetQuiz()">↩️ Làm Lại</button>
+     </div>
+    </div>
+   </div><!-- AI Teacher Tab -->
+   <div id="ai-teacher" class="tab-content">
+    <div class="ai-teacher tab-inner-container">
+     <h2 style="font-size: 2rem; text-align: center; font-weight: 700;">🤖 AI Giáo Viên Âm Nhạc</h2>
+     <div class="teacher-avatar">
+      🎼
+     </div>
+     <p style="text-align: center; font-size: 1.2rem; font-weight: bold;">Cô Âm Nhạc</p>
+     <p style="text-align: center;">Hãy hỏi cô về nhịp 4/4 nhé!</p>
+     <div class="chat-container" id="chatContainer">
+      <div class="message ai"><strong>Cô Âm Nhạc:</strong> Chào em! Cô sẵn sàng trả lời mọi câu hỏi về nhịp 4/4. Hãy hỏi cô bất cứ điều gì em muốn biết nhé! 🎵
+      </div>
+     </div>
+     <div class="input-container"><input type="text" class="question-input" id="questionInput" placeholder="Nhập câu hỏi của em về nhịp 4/4..." onkeypress="handleEnter(event)"> <button class="btn btn-primary" onclick="askAI()">Hỏi</button>
+     </div>
+    </div>
+   </div><!-- About Tab -->
+   <div id="about" class="tab-content">
+        <div class="tab-inner-container">
+            <div class="about-header">
+                <img src="https://i.postimg.cc/YSVpBGJQ/ART-PRO-2.png" alt="Art Pro Education Logo" onerror="this.src='https://placehold.co/100x100/ed64a6/ffffff?text=Logo';">
+                <h2>Giới thiệu</h2>
+                <p>Ứng dụng kiểm tra Âm nhạc</p>
+            </div>
+
+            <div class="about-grid">
+                <div class="about-card creator-card">
+                    <h3>✨ Người tạo ✨</h3>
+                    <img src="https://i.postimg.cc/YSVpBGJQ/ART-PRO-2.png" alt="Avatar Người tạo" class="creator-avatar" onerror="this.src='https://placehold.co/120x120/fbb6ce/ffffff?text=Avatar';">
+                    <p style="font-size: 1.8rem; font-weight: bold; color: var(--primary-color);">Tuấn Anh</p>
+                    <p style="font-style: italic; color: #555;">Developer & Educator</p>
+                    <p>🎵 Chuyên gia giáo dục âm nhạc 🎵</p>
+                </div>
+                <div class="about-card support-card">
+                    <h3>💖 Ủng hộ tác giả 💖</h3>
+                    <img src="https://i.postimg.cc/WzN1bBJy/QR-TUAN-ANH.png" alt="QR Ủng Hộ" class="qr-code" onerror="this.src='https://placehold.co/150x150/48bb78/ffffff?text=QR+Code';">
+                    <p>Quét mã QR để ủng hộ</p>
+                    <button class="btn btn-primary" onclick="downloadQR()">🗂️ Tải QR Code</button>
+                </div>
+            </div>
+
+            <div class="features-section">
+                <h3>🚀 Tính năng nổi bật 🚀</h3>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <span class="feature-icon">🎵</span>
+                        <span class="feature-text">Tích hợp video karaoke</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">👥</span>
+                        <span class="feature-text">Quản lý nhóm linh hoạt</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📱</span>
+                        <span class="feature-text">Giao diện thân thiện</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">⚡</span>
+                        <span class="feature-text">Hiệu suất cao</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+  <script>
+        // Configuration object
+        const defaultConfig = {
+            game_title: "🎵ÂM NHẠC - NHỊP 4/4🎵",
+            welcome_message: "Chào mừng các em đến với ứng dụng học âm nhạc chuyên nghiệp!",
+            ai_teacher_name: "Cô Âm Nhạc"
+        };
+
+        // Rhythm simulator variables
+        let rhythmInterval;
+        let currentBeat = 0;
+        let isPlaying = false;
+        let tempo = 100;
+
+        // Audio system for rhythm beats
+        let audioContext;
+        let isAudioEnabled = true;
+
+        // Initialize audio context
+        function initAudioContext() {
+            if (audioContext) return;
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Web Audio API not supported');
+                isAudioEnabled = false;
+            }
+        }
+
+        // Create beat sound
+        function playBeatSound(beatType) {
+            if (!isAudioEnabled || !audioContext) return;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            switch(beatType) {
+                case 'strong':
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    break;
+                case 'medium':
+                    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    break;
+                case 'weak':
+                    oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                    break;
+            }
+            oscillator.type = 'sine';
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+
+        // Quiz variables
+        let currentQuiz = [];
+        let userAnswers = [];
+        let quizScore = 0;
+        
+        const quizDatabase = [
+            { question: "Nhịp 4/4 có bao nhiêu phách trong một ô nhịp?", options: ["2 phách", "3 phách", "4 phách", "5 phách"], correct: 2 },
+            { question: "Nhịp 4/4 còn được gọi là gì?", options: ["Nhịp đặc biệt", "Nhịp thông thường", "Nhịp nhanh", "Nhịp chậm"], correct: 1 },
+            { question: "Trong nhịp 4/4, mỗi phách tương đương với nốt gì?", options: ["Nốt trắng", "Nốt đen", "Nốt móc đơn", "Nốt tròn"], correct: 1 },
+            { question: "Phách nào trong nhịp 4/4 là phách mạnh chính?", options: ["Phách 1", "Phách 2", "Phách 3", "Phách 4"], correct: 0 },
+            { question: "Phách nào trong nhịp 4/4 là phách mạnh phụ?", options: ["Phách 1", "Phách 2", "Phách 3", "Phách 4"], correct: 2 },
+            { question: "Thứ tự cường độ các phách trong nhịp 4/4 là gì?", options: ["Mạnh - Mạnh - Nhẹ - Nhẹ", "Mạnh - Nhẹ - Mạnh vừa - Nhẹ", "Nhẹ - Mạnh - Nhẹ - Mạnh", "Tất cả đều mạnh"], correct: 1 }
+        ];
+
+        const aiResponses = {
+            "nhịp 4/4 là gì": "Nhịp 4/4, hay nhịp thông thường, có 4 phách trong mỗi ô nhịp, và mỗi phách bằng một nốt đen. Đây là nhịp phổ biến nhất trong âm nhạc hiện đại! 🎵",
+            "phách mạnh phụ": "Trong nhịp 4/4, phách 3 là phách mạnh phụ! Nó không mạnh bằng phách 1 nhưng mạnh hơn phách 2 và 4. 👣✨",
+            "cách đánh nhịp 4/4": "Em hãy tưởng tượng vẽ một hình chữ thập: Phách 1: xuống (mạnh), phách 2: sang trái (nhẹ), phách 3: sang phải (mạnh vừa), phách 4: lên trên (nhẹ). ⬇️⬅️➡️⬆️",
+            "ví dụ về nhịp 4/4": "Rất nhiều bài hát em biết đều là nhịp 4/4! Như 'Happy Birthday', hoặc hầu hết nhạc pop hiện đại. Thử đếm 1-2-3-4 theo xem! ⭐"
+        };
+        
+        // Initialize the app
+        function init() {
+            generateNewQuiz();
+        }
+
+        // Handle loading screen
+        window.onload = function() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const mainContainer = document.querySelector('.container');
+            
+            setTimeout(() => {
+                if(loadingScreen) {
+                    loadingScreen.style.opacity = '0';
+                    loadingScreen.style.visibility = 'hidden';
+                }
+                if(mainContainer) {
+                    mainContainer.style.display = 'block';
+                }
+            }, 2800); // Simulate loading time
+            
+            init();
+        };
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function startRhythm() {
+            if (isPlaying) return;
+            initAudioContext();
+            isPlaying = true;
+            currentBeat = 0;
+            const beatInterval = 60000 / tempo;
+            const runBeat = () => {
+                if (!isPlaying) return;
+                document.querySelectorAll('.beat').forEach(b => b.classList.remove('active'));
+                const currentBeatElement = document.getElementById(`beat${currentBeat + 1}`);
+                if (currentBeatElement) currentBeatElement.classList.add('active');
+                let beatType = (currentBeat === 0) ? 'strong' : (currentBeat === 2) ? 'medium' : 'weak';
+                playBeatSound(beatType);
+                currentBeat = (currentBeat + 1) % 4;
+            };
+            clearInterval(rhythmInterval);
+            rhythmInterval = setInterval(runBeat, beatInterval);
+            runBeat();
+        }
+
+        function stopRhythm() {
+            isPlaying = false;
+            clearInterval(rhythmInterval);
+            document.querySelectorAll('.beat').forEach(b => b.classList.remove('active'));
+            currentBeat = 0;
+        }
+
+        function updateTempo() {
+            tempo = document.getElementById('tempoSlider').value;
+            document.getElementById('tempoDisplay').textContent = tempo + ' BPM';
+            if (isPlaying) {
+                stopRhythm();
+                startRhythm();
+            }
+        }
+
+        function generateNewQuiz() {
+            const shuffled = [...quizDatabase].sort(() => 0.5 - Math.random());
+            currentQuiz = shuffled.slice(0, 5); // 5 questions per quiz
+            userAnswers = new Array(currentQuiz.length).fill(null);
+            quizScore = 0;
+            renderQuiz();
+            updateQuizProgress();
+        }
+        
+        function renderQuiz() {
+            const container = document.getElementById('quizQuestions');
+            if(!container) return;
+            container.innerHTML = '';
+            currentQuiz.forEach((q, index) => {
+                const isAnswered = userAnswers[index] !== null;
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.innerHTML = `
+                    <h3>Câu ${index + 1}: ${q.question}</h3>
+                    <div class="options">
+                        ${q.options.map((option, optIndex) => {
+                            let optionClass = 'option';
+                            if (isAnswered) {
+                                if (optIndex === q.correct) optionClass += ' correct';
+                                else if (optIndex === userAnswers[index]) optionClass += ' incorrect';
+                            }
+                            return `<div class="${optionClass}" onclick="selectAnswer(${index}, ${optIndex})">${String.fromCharCode(65 + optIndex)}. ${option}</div>`;
+                        }).join('')}
+                    </div>
+                `;
+                container.appendChild(questionDiv);
+            });
+        }
+        
+        function selectAnswer(questionIndex, optionIndex) {
+            if (userAnswers[questionIndex] !== null) return;
+            userAnswers[questionIndex] = optionIndex;
+            if (optionIndex === currentQuiz[questionIndex].correct) {
+                quizScore++;
+            }
+            renderQuiz();
+            updateQuizProgress();
+        }
+        
+        function updateQuizProgress() {
+            const answeredCount = userAnswers.filter(a => a !== null).length;
+            const progress = (answeredCount / currentQuiz.length) * 100;
+            const progressFill = document.getElementById('progressFill');
+            const scoreDisplay = document.getElementById('score');
+            if(progressFill) progressFill.style.width = progress + '%';
+            if(scoreDisplay) scoreDisplay.textContent = `${quizScore}`;
+            if (answeredCount === currentQuiz.length) {
+                showQuizResults();
+            }
+        }
+        
+        function showQuizResults() {
+             const container = document.getElementById('quizQuestions');
+             if(!container) return;
+            const percentage = Math.round((quizScore / currentQuiz.length) * 100);
+            let message = (percentage >= 80) ? '🎉 Xuất sắc!' : (percentage >= 50) ? '👍 Tốt lắm!' : '💪 Cố gắng lên!';
+            const resultsDiv = document.createElement('div');
+            resultsDiv.className = 'question';
+            resultsDiv.style.textAlign = 'center';
+            resultsDiv.innerHTML = `<h2>🏆 Kết Quả</h2><p style="font-size: 1.5rem;">${message}</p><p>Điểm: ${quizScore}/${currentQuiz.length}</p>`;
+            container.prepend(resultsDiv);
+        }
+
+        function resetQuiz() {
+            generateNewQuiz();
+        }
+
+        function askAI() {
+            const input = document.getElementById('questionInput');
+            if (!input || !input.value.trim()) return;
+            const question = input.value.trim();
+            addMessage('user', question);
+            const response = generateAIResponse(question.toLowerCase());
+            setTimeout(() => addMessage('ai', response), 800);
+            input.value = '';
+        }
+
+        function handleEnter(event) {
+            if (event.key === 'Enter') askAI();
+        }
+
+        function addMessage(sender, text) {
+            const container = document.getElementById('chatContainer');
+            if(!container) return;
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.innerHTML = `<strong>${sender === 'user' ? 'Em' : 'Cô Âm Nhạc'}:</strong> ${text}`;
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function generateAIResponse(question) {
+            for (const [key, response] of Object.entries(aiResponses)) {
+                if (question.includes(key)) return response;
+            }
+            return "Câu hỏi thú vị! Em có thể hỏi cô cụ thể hơn về phách mạnh, phách nhẹ, hoặc ví dụ bài hát được không? 🎼";
+        }
+
+        function downloadQR() {
+            const qrImage = document.querySelector('.support-card .qr-code');
+            if (!qrImage || !qrImage.src) {
+                showNotification('QR code không khả dụng', 'error');
+                return;
+            }
+            const link = document.createElement('a');
+            link.href = qrImage.src;
+            link.download = 'QR-Ung-Ho.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showNotification('Đang tải QR code...', 'success');
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 15px 25px; border-radius: 12px; color: white; font-weight: 600; background: ${type === 'error' ? '#e53e3e' : '#38a169'}; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transform: translateX(120%); transition: transform 0.4s ease;`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => { notification.style.transform = 'translateX(0)'; }, 10);
+            setTimeout(() => {
+                notification.style.transform = 'translateX(120%)';
+                setTimeout(() => notification.remove(), 400);
+            }, 3000);
+        }
+        
+    </script>
+ </body>
+</html>
+
